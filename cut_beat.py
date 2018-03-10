@@ -44,23 +44,25 @@ def cut_beat(index_R, data_ecg):
     return True, out
 
 # Load ecg signal and index of R peaks
-path_dir = '/home/thangkt/git/fish/PROCESSED ECG database/processedST'
+path_dir = '/home/thangkt/git/fish/PROCESSED ECG database/processedSA'
 list_dirs = [d for d in os.listdir(path_dir)
                 if d.endswith(".txt")]
 list_dirs = np.sort(list_dirs)
-data_index_R = loadmat('r_index/processedST.mat')
+data_index_R = loadmat('r_index/processedSA.mat')
 # end load
 start = time.time()
 
+# Loop with all file ecg
 for i in range(0, len(list_dirs)):
 # for i in range(5, 6):
-    data_ecg = np.loadtxt(os.path.join(path_dir, list_dirs[i]))
-    index_R = data_index_R['r_index'][0][i][0]
-    if len(index_R) == 0:
+    data_ecg = np.loadtxt(os.path.join(path_dir, list_dirs[i])) # ECG signal
+    index_R = data_index_R['r_index'][0][i][0]                  # index of r peaks
+    if len(index_R) == 0:       # Check if signal has no r peaks
         print ("Can't process signal hasn't r peak")
     else:
         print (index_R.shape)
-        check, a = cut_beat(index_R, data_ecg)
+        # Segmentes with r peaks - numpy array [-1, img.shape[0], img.shape[1]]
+        check, a = cut_beat(index_R, data_ecg) 
         if check:
             if i == 0:                # first loop
                 list_ = a
@@ -70,7 +72,7 @@ for i in range(0, len(list_dirs)):
     print ("file " + str(i) + list_dirs[i])
 
 print (list_.shape)
-np.save("train/st.npy", list_)
+np.save("train/sa.npy", list_) # Save images as npy file
 print ("Successful!")
 end = time.time()
 print ("Time: {}".format(end - start))

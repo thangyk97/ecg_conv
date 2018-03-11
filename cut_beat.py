@@ -9,16 +9,16 @@ Cut ecg signal to images of beat
 @arg: r index, ecg
 @output: array of image (numpy)
 """
-def cut_beat(index_R, data_ecg):
+def cut_beat(index_R, data_ecg, j):
     list_ = [] # store images of 1 signal
     # range(len(index_R))
+    length = len(data_ecg)
     for i in range(len(index_R)):
-        try:
-            # Get segment with r peak
-            temp = data_ecg[index_R[i+1] - 180: index_R[i+1] + 180]
-        except IndexError:
+        if (index_R[i] - 180 >= 0 and index_R[i] + 180 < length ):
+            temp = data_ecg[index_R[i] - 180: index_R[i] + 180]
+        else:
+            print ("continue rooi ne !")
             continue
-
         # Create image and save
         fig = plt.figure(frameon=False)
         ax = plt.Axes(fig, [0., 0., 1., 1.])
@@ -40,7 +40,7 @@ def cut_beat(index_R, data_ecg):
 
     out = np.array(list_)
     out = np.reshape(out, [-1, a.shape[0], a.shape[1]]) # Reshape to append
-    print (out.shape)
+    print ("output shape array of signal: {}".format(out.shape))
     return True, out
 
 # Load ecg signal and index of R peaks
@@ -51,28 +51,34 @@ list_dirs = np.sort(list_dirs)
 data_index_R = loadmat('r_index/processedSA.mat')
 # end load
 start = time.time()
+# Load index of 100hz file sa
+# file_100hz = np.loadtxt('r_index/hz100sa.txt', int)
+# raw = np.array(range(len(list_dirs))) # index of list_dirs
+# file_1000hz = np.delete(raw, file_100hz, 0) # index of 1000hz file sa
 
 # Loop with all file ecg
-for i in range(0, len(list_dirs)):
-# for i in range(5, 6):
+check_first_loop = True # first loop
+for i in range(len(list_dirs)):
     data_ecg = np.loadtxt(os.path.join(path_dir, list_dirs[i])) # ECG signal
     index_R = data_index_R['r_index'][0][i][0]                  # index of r peaks
+    print ("\nfile " + str(i) + list_dirs[i])
     if len(index_R) == 0:       # Check if signal has no r peaks
         print ("Can't process signal hasn't r peak")
     else:
-        print (index_R.shape)
+        print ("index r shape: {}".format(index_R.shape))
         # Segmentes with r peaks - numpy array [-1, img.shape[0], img.shape[1]]
-        check, a = cut_beat(index_R, data_ecg) 
+        check, a = cut_beat(index_R, data_ecg, i) 
         if check:
-            if i == 0:                # first loop
+            if check_first_loop:                # first loop
                 list_ = a
+                check_first_loop = False
             else:
                 list_ = np.append(list_, a, 0)
     
-    print ("file " + str(i) + list_dirs[i])
+    
 
 print (list_.shape)
-np.save("train/sa.npy", list_) # Save images as npy file
+# np.save("train/sa1000hz.npy", list_) # Save images as npy file
 print ("Successful!")
 end = time.time()
 print ("Time: {}".format(end - start))

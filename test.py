@@ -1,19 +1,11 @@
 import numpy as np 
 import matplotlib.pyplot as plt 
 import time
-from modules import function
 
-start = time.time()
+import os
+from scipy.io import loadmat
 
+data_ecg = np.array(range(1000))
+index_R = np.array([1, 25, 60])
 
-images = np.load("train/highp.npy")
-labels = np.zeros(shape=[images.shape[0]])
-fn = function()
-fn.display_images_has_label(images=images, labels=labels, label=0)
-
-
-print (images.shape)
-
-
-end = time.time()
-print ("time: {}".format(end - start))
+print (data_ecg[1000])

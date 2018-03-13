@@ -13,7 +13,7 @@ def one_hot(index, num_classes):
     tmp[index] = 1.0
     return tmp
 
-def _input():
+def input():
     """
 
     :return: data and labels placeholder for building model
@@ -28,7 +28,7 @@ def _input():
         name='label')
     return x, y_
 
-def _conv2d_relu(x, filter_height, filter_width, num_filters_out,
+def conv2d_relu(x, filter_height, filter_width, num_filters_out,
                  stride_y, stride_x, name, padding='SAME'):
     """
 
@@ -104,6 +104,19 @@ def fully_connected(x, num_out, name, relu=True):
     else:
         return act
 
+def dropout(x, keep_prob):
+    """
+    drop layer, drop units have probility
+    :param x:
+    :param keep_prob:
+    :return:
+    """
+    return tf.nn.dropout(x, keep_prob)
+
+def flatten(x):
+
+
+def reference(x):
 
 
 

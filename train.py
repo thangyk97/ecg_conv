@@ -114,9 +114,53 @@ def dropout(x, keep_prob):
     return tf.nn.dropout(x, keep_prob)
 
 def flatten(x):
-
+    """
+    flatten ndarray to vector
+    :param x:
+    :return:
+    """
+    shape = x.get_shape().as_list()
+    new_shape = np.prod(shape[1:])
+    x = tf.reshape(x, [-1, new_shape], name='flatten')
+    return x
 
 def reference(x):
+    """
+
+    :param x:
+    :return: output predict
+    """
+    with tf.variable_scope('scope1'):
+        conv1 = conv2d_relu(x, 11, 11, 96, 4, 4, padding='VALID', name='conv1')
+        pool1 = max_pool(conv1, 3, 3, 2, 2, padding='VALID', name='pool1')
+
+    with tf.variable_scope('scope2'):
+        conv2 = conv2d_relu(pool1, 5, 5, 256, 1, 1, name='conv2')
+        pool2 = max_pool(conv2, 3, 3, 2, 2, padding='VALID', name='pool2')
+
+    with tf.variable_scope('scope3'):
+        conv3 = conv2d_relu(pool2, 3, 3, 384, 1, 1, name='conv3')
+
+    with tf.variable_scope('scope4'):
+        conv4 = conv2d_relu(conv3, 3, 3, 384, 1, 1, name='conv4')
+
+    with tf.variable_scope('scope5'):
+        conv5 = conv2d_relu(conv4, 3, 3, 384, 1, 1, name='conv5')
+        pool5 = max_pool(conv5, 3, 3, 2, 2, padding='VALID', name='pool5')
+
+    with tf.variable_scope('scope6'):
+        flattened = tf.reshape(pool5)
+        fc6 = fully_connected(flattened, 4096, name='fc6', relu=True)
+        dropout6 = dropout(fc6, 0.5)
+
+    with tf.variable_scope('scope7'):
+        fc7 = fully_connected(dropout6, 4096, name='fc7')
+        dropout7 = dropout(fc7, 0.7)
+
+    with tf.variable_scope('scope8'):
+        fc8 = fully_connected(dropout7, 4, relu=False, name='fc8')
+
+    return fc8
 
 
 

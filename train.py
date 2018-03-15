@@ -124,7 +124,7 @@ def flatten(x):
     x = tf.reshape(x, [-1, new_shape], name='flatten')
     return x
 
-def reference(x):
+def inference(x):
     """
 
     :param x:
@@ -149,7 +149,7 @@ def reference(x):
         pool5 = max_pool(conv5, 3, 3, 2, 2, padding='VALID', name='pool5')
 
     with tf.variable_scope('scope6'):
-        flattened = tf.reshape(pool5)
+        flattened = flatten(pool5)
         fc6 = fully_connected(flattened, 4096, name='fc6', relu=True)
         dropout6 = dropout(fc6, 0.5)
 
@@ -161,6 +161,88 @@ def reference(x):
         fc8 = fully_connected(dropout7, 4, relu=False, name='fc8')
 
     return fc8
+
+def _losses(logits, labels):
+    l2_loss = 1e-4 * tf.add_n([tf.nn.l2_loss(var) for var in tf.trainable_variables()]) # regularise bias
+    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=labels))
+    total_loss = tf.add(l2_loss, cross_entropy, name='loss')
+    return total_loss
+
+def _train_op(loss, global_step):
+    learning_rate = tf.placeholder(dtype=tf.float32, name='learning_rate')
+    train_step = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss, global_step)
+    return train_step
+
+if __name__ == '__main__':
+    
+    images = []
+    labels = []
+
+    sess = tf.InteractiveSession() # Create session
+    global_step = tf.contrib.framework.get_or_create_global_step()
+
+    # Build graph
+    x, y = input()
+    logits = inference(x)
+    loss = _losses(logits, y) 
+
+    learning_rate, train_step = _train_op(loss, global_step)
+    prediction = tf.nn.softmax(logits)
+    correct_pred = tf.equal(tf.arg_max(prediction, 1), tf.arg_max(y, 1))
+    accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+
+    # Writer for tensorboard
+    writer = tf.summary.FileWriter('./summary')
+    writer.add_graph(sess.graph)
+    tf.summary.scalar('loss', loss)
+    tf.summary.scalar('acc', accuracy)
+    merge_summary = tf.summary.merge_all()
+    sess.run(tf.global_variables_initializer())
+
+    for epoch in range(100):
+
+        # Shuffle data per each epoch
+        index = np.arange(len(images))
+        np.random.shuffle(index)
+        images = images[index]
+        labels = labels[index]
+
+        print('Epoch %d' % epoch)
+        mean_loss = []
+        mean_acc = []
+        batch_size = 128
+        num_batch = int(len(images) // batch_size)
+
+        for batch in range(num_batch):
+            print('Training on batch ..............................%d / %d' % (batch, num_batch))
+
+            # Get batch image and batch label
+            start = batch * batch_size
+            stop = min((batch + 1) * batch_size, len(images))
+            batch_image = np.asarray(images[start: stop])
+            batch_label = np.asarray(labels[start: stop])
+
+            ttl, acc = sess.run([loss, train_step, accuracy, merge_summary], 
+                                feed_dict={
+                                    x: batch_image,
+                                    y: batch_label,
+                                    learning_rate: 0.005})
+            writer.add_summary(s, int(global_step.eval()))
+            mean_loss.append(ttl)
+            mean_acc.append(acc)
+
+        mean_loss = np.mean(mean_loss)
+        mean_acc = np.mean(mean_acc)
+
+        print('\nTraining loss: %f' % mean_loss)
+        print('Training accuracy: %f' % mean_acc)
+
+        
+
+            
+        
+
+
 
 
 

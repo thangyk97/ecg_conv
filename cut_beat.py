@@ -11,11 +11,12 @@ Cut ecg signal to images of beat
 """
 def cut_beat(index_R, data_ecg, j):
     list_ = [] # store images of 1 signal
+    
     # range(len(index_R))
     length = len(data_ecg)
     for i in range(len(index_R)):
-        if (index_R[i] - 180 >= 0 and index_R[i] + 180 < length ):
-            temp = data_ecg[index_R[i] - 180: index_R[i] + 180]
+        if (index_R[i] - 18 >= 0 and index_R[i] + 18 < length ):
+            temp = data_ecg[index_R[i] - 18: index_R[i] + 18]
         else:
             print ("continue rooi ne !")
             continue
@@ -51,14 +52,14 @@ list_dirs = np.sort(list_dirs)
 data_index_R = loadmat('r_index/processedSA.mat')
 # end load
 start = time.time()
-# Load index of 100hz file sa
-# file_100hz = np.loadtxt('r_index/hz100sa.txt', int)
-# raw = np.array(range(len(list_dirs))) # index of list_dirs
-# file_1000hz = np.delete(raw, file_100hz, 0) # index of 1000hz file sa
+# Load index of 1000hz file sa
+file_1000hz = np.loadtxt('r_index/hz1000sa.txt', int)
+raw = np.array(range(len(list_dirs))) # index of list_dirs
+file_100hz = np.delete(raw, file_1000hz, 0) # index of 100hz file sa
 
 # Loop with all file ecg
 check_first_loop = True # first loop
-for i in range(len(list_dirs)):
+for i in file_100hz:
     data_ecg = np.loadtxt(os.path.join(path_dir, list_dirs[i])) # ECG signal
     index_R = data_index_R['r_index'][0][i][0]                  # index of r peaks
     print ("\nfile " + str(i) + list_dirs[i])
@@ -78,7 +79,7 @@ for i in range(len(list_dirs)):
     
 
 print (list_.shape)
-# np.save("train/sa1000hz.npy", list_) # Save images as npy file
+np.save("train/sa100hz.npy", list_) # Save images as npy file
 print ("Successful!")
 end = time.time()
 print ("Time: {}".format(end - start))

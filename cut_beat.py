@@ -11,7 +11,7 @@ Cut ecg signal to images of beat
 """
 def cut_beat(index_R, data_ecg, j):
     list_ = [] # store images of 1 signal
-    
+
     # range(len(index_R))
     length = len(data_ecg)
     for i in range(len(index_R)):

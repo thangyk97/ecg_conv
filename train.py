@@ -236,13 +236,3 @@ if __name__ == '__main__':
 
         print('\nTraining loss: %f' % mean_loss)
         print('Training accuracy: %f' % mean_acc)
-
-        
-
-            
-        
-
-
-
-
-

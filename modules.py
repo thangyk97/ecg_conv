@@ -32,24 +32,6 @@ class function(object):
             plt.imshow(image)
         plt.show()
 
-    # def input():
-
-    # def conv2d_relu():
-        
-    # def fully_connected():
-
-    # def fully_connected_relu():
-        
-    # def max_pool():
-        
-    # def flatten():
-        
-    # def inference():
-        
-    # def losses():
-        
-    # def train_op():
-        
     
 
     
